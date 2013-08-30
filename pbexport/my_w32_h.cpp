@@ -26,7 +26,7 @@ std::string DescribeW32Error(DWORD err) {
 			GetUserDefaultLangID(), const_cast<char *>(res.data()), buf_len, 0) )
 	{
 		TCHAR buf_num[256];
-		res = "Код ошибки = ";
+		res = "РљРѕРґ РѕС€РёР±РєРё = ";
 		res.append( _ltoa(err, buf_num, 10) );
 	}
 
@@ -42,8 +42,8 @@ void ScanDirectory(std::string findMask, std::list<std::string> &voc, bool findD
 		DWORD errCode = GetLastError();
 		
 		if (errCode != ERROR_FILE_NOT_FOUND) {
-			std::string findErr("Не удался поиск файлов: '");
-			findErr.append(findMask).append("' ошибка: ").append(DescribeW32Error(errCode) );
+			std::string findErr("РќРµ СѓРґР°Р»СЃСЏ РїРѕРёСЃРє С„Р°Р№Р»РѕРІ: '");
+			findErr.append(findMask).append("' РѕС€РёР±РєР°: ").append(DescribeW32Error(errCode) );
 
 			throw DirException(findErr);
 		};
@@ -67,8 +67,8 @@ void ScanDirectory(std::string findMask, std::list<std::string> &voc, bool findD
 			DWORD errCode = GetLastError();
 		
 			if (errCode != ERROR_NO_MORE_FILES) {
-				std::string findErr("Не удался поиск файлов: '");
-				findErr.append(findMask).append("' ошибка: ").append(DescribeW32Error(errCode) );
+				std::string findErr("РќРµ СѓРґР°Р»СЃСЏ РїРѕРёСЃРє С„Р°Р№Р»РѕРІ: '");
+				findErr.append(findMask).append("' РѕС€РёР±РєР°: ").append(DescribeW32Error(errCode) );
 
 				throw DirException(findErr);
 			};
@@ -90,8 +90,8 @@ long GetModificationDate(string filePath){
 		return 0;
 	};
 
-	if ( GetFileTime(f, NULL, NULL, &ft) ) {	// Время последнего исправления
-		FileTimeToLocalFileTime(&ft, &ft_local); //	т.к. mktime нужно местное время
+	if ( GetFileTime(f, NULL, NULL, &ft) ) {	// Р’СЂРµРјСЏ РїРѕСЃР»РµРґРЅРµРіРѕ РёСЃРїСЂР°РІР»РµРЅРёСЏ
+		FileTimeToLocalFileTime(&ft, &ft_local); //	С‚.Рє. mktime РЅСѓР¶РЅРѕ РјРµСЃС‚РЅРѕРµ РІСЂРµРјСЏ
 		if ( FileTimeToSystemTime(&ft_local, &st) ) {
 			time_t t;
 			tm timeinfo = {0};
@@ -104,7 +104,7 @@ long GetModificationDate(string filePath){
 			timeinfo.tm_sec = st.wSecond;
 
 			t = mktime ( &timeinfo );
-			result = (long) t; // Число секунд с 1970-01-01 00:00:00 
+			result = (long) t; // Р§РёСЃР»Рѕ СЃРµРєСѓРЅРґ СЃ 1970-01-01 00:00:00 
 		}
 	};
 
@@ -140,7 +140,7 @@ int SetModificationDate(string filePath, long date) {
 		return GetLastError();
 	};
 
-	if ( ! SetFileTime(f, NULL, NULL, &ft) ) {	// Время последнего исправления
+	if ( ! SetFileTime(f, NULL, NULL, &ft) ) {	// Р’СЂРµРјСЏ РїРѕСЃР»РµРґРЅРµРіРѕ РёСЃРїСЂР°РІР»РµРЅРёСЏ
 		result = GetLastError();
 	};
 
@@ -150,38 +150,38 @@ int SetModificationDate(string filePath, long date) {
 };
 
 void BuildPath(std::string path) {
-	if (GetFileAttributes(path.c_str() ) != INVALID_FILE_ATTRIBUTES) return;	// А вдруг всё уже есть
+	if (GetFileAttributes(path.c_str() ) != INVALID_FILE_ATTRIBUTES) return;	// Рђ РІРґСЂСѓРі РІСЃС‘ СѓР¶Рµ РµСЃС‚СЊ
 
 	long slashPos=0;
 	string currPath;
 	
 	currPath.reserve(path.length() );
 
-	//---- Выберем начальный путь, начиная с которого проверяем существование ветки
+	//---- Р’С‹Р±РµСЂРµРј РЅР°С‡Р°Р»СЊРЅС‹Р№ РїСѓС‚СЊ, РЅР°С‡РёРЅР°СЏ СЃ РєРѕС‚РѕСЂРѕРіРѕ РїСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ РІРµС‚РєРё
 
 	if (path.length() > 1) {
 		if (path.substr(1, 2) == ":\\") {
-			// Локальный путь с буквой диска
+			// Р›РѕРєР°Р»СЊРЅС‹Р№ РїСѓС‚СЊ СЃ Р±СѓРєРІРѕР№ РґРёСЃРєР°
 			slashPos = 3;
 		}
 	};
 	if (!slashPos) {
 		if (path.substr(0, 2) == "\\\\") {
-			// Сетевой путь
+			// РЎРµС‚РµРІРѕР№ РїСѓС‚СЊ
 			slashPos = 2;
 		};
 	};
-	// Иначе считаем путь относительным, и начинаем проверять с первого символа
+	// РРЅР°С‡Рµ СЃС‡РёС‚Р°РµРј РїСѓС‚СЊ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅС‹Рј, Рё РЅР°С‡РёРЅР°РµРј РїСЂРѕРІРµСЂСЏС‚СЊ СЃ РїРµСЂРІРѕРіРѕ СЃРёРјРІРѕР»Р°
 
-	//---- Идём от корня, создавая недостающие куски
+	//---- РРґС‘Рј РѕС‚ РєРѕСЂРЅСЏ, СЃРѕР·РґР°РІР°СЏ РЅРµРґРѕСЃС‚Р°СЋС‰РёРµ РєСѓСЃРєРё
 	while(currPath.length() < path.length() ) {
 		slashPos = path.find_first_of('\\', slashPos+1);
 		if (slashPos == string::npos) slashPos = path.length();
-		currPath.assign(path, 0, slashPos);			// Лень заморачиваться с отладкой append
+		currPath.assign(path, 0, slashPos);			// Р›РµРЅСЊ Р·Р°РјРѕСЂР°С‡РёРІР°С‚СЊСЃСЏ СЃ РѕС‚Р»Р°РґРєРѕР№ append
 
 		long attr = GetFileAttributes(currPath.c_str() );
 		if (attr == INVALID_FILE_ATTRIBUTES)
-			CreateDirectory(currPath.c_str(), NULL);	// Пофиг ошибки. Если не удалось создать, выясним это на этапе открытия файла
+			CreateDirectory(currPath.c_str(), NULL);	// РџРѕС„РёРі РѕС€РёР±РєРё. Р•СЃР»Рё РЅРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ, РІС‹СЏСЃРЅРёРј СЌС‚Рѕ РЅР° СЌС‚Р°РїРµ РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°
 	};	
 };
 
@@ -191,7 +191,7 @@ std::string CatalogFromPath(std::string path) {
 	if (slashPos == string::npos) 
 		return string();
 	else
-		return path.substr(0, slashPos);	// Ибо первая позиция в строке: slashPos==0
+		return path.substr(0, slashPos);	// РР±Рѕ РїРµСЂРІР°СЏ РїРѕР·РёС†РёСЏ РІ СЃС‚СЂРѕРєРµ: slashPos==0
 };
 
 std::string FilenameFromPath(std::string path){
@@ -200,7 +200,7 @@ std::string FilenameFromPath(std::string path){
 	if (slashPos == string::npos) 
 		return path;
 	else
-		return path.substr(slashPos+1, path.length() - (slashPos+1));	// Ибо первая позиция в строке: slashPos==0
+		return path.substr(slashPos+1, path.length() - (slashPos+1));	// РР±Рѕ РїРµСЂРІР°СЏ РїРѕР·РёС†РёСЏ РІ СЃС‚СЂРѕРєРµ: slashPos==0
 };
 
 int CopyDirectory_pbl(std::string src, std::string dst) {
@@ -215,7 +215,7 @@ int CopyDirectory_pbl(std::string src, std::string dst) {
 		std::string dstPath=dst + "\\"+ *i;
 		if (!CopyFile(srcPath.c_str(), dstPath.c_str(), FALSE) ) {
 			int err = GetLastError();
-			cout << "Не удалось скопировать '" << srcPath << "' -> '" << dstPath << "' : " << DescribeW32Error(err) << endl;
+			cout << "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРєРѕРїРёСЂРѕРІР°С‚СЊ '" << srcPath << "' -> '" << dstPath << "' : " << DescribeW32Error(err) << endl;
 			res = 1;
 		}
 	};

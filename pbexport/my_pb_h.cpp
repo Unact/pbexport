@@ -16,7 +16,7 @@ const char* PBException::what() {
 	return mes.c_str();
 };
 
-//------------------ Местные объявления
+//------------------ РњРµСЃС‚РЅС‹Рµ РѕР±СЉСЏРІР»РµРЅРёСЏ
 
 /*
 +--------------------------------------------------------------+
@@ -44,11 +44,11 @@ typedef struct {
 	short CommentLen;
 	short EntryNameLen;
 	char EntryName[65536];
-} ENTRY_HEADER;																// Нужен ScanEntryDates
+} ENTRY_HEADER;																// РќСѓР¶РµРЅ ScanEntryDates
 
-void ScanEntryDates(string libPath, map<string, LibEntity> &voc);			// Этот ужас нужен, так как средствами API не получается получить дату модификации исходника
+void ScanEntryDates(string libPath, map<string, LibEntity> &voc);			// Р­С‚РѕС‚ СѓР¶Р°СЃ РЅСѓР¶РµРЅ, С‚Р°Рє РєР°Рє СЃСЂРµРґСЃС‚РІР°РјРё API РЅРµ РїРѕР»СѓС‡Р°РµС‚СЃСЏ РїРѕР»СѓС‡РёС‚СЊ РґР°С‚Сѓ РјРѕРґРёС„РёРєР°С†РёРё РёСЃС…РѕРґРЅРёРєР°
 
-void WINAPI DirCallback(PPBORCA_DIRENTRY libItem, LPVOID uData);			// Нужен в ScanDirectory_pbl
+void WINAPI DirCallback(PPBORCA_DIRENTRY libItem, LPVOID uData);			// РќСѓР¶РµРЅ РІ ScanDirectory_pbl
 
 
 
@@ -57,14 +57,14 @@ void WINAPI DirCallback(PPBORCA_DIRENTRY libItem, LPVOID uData);			// Нужен в Sc
 std::string GetPBError(HPBORCA s) {
 	char buf[MAX_ERR_BUF_LEN];
 
-	string res("Ошибка PBORCA: ");
+	string res("РћС€РёР±РєР° PBORCA: ");
 	PBORCA_SessionGetError(s, buf, MAX_ERR_BUF_LEN);
 		
 	return res.append(buf);
 };
 
 void ScanDirectory_pbl(std::string pbdir, std::map<std::string, LibEntity> &voc) {
-	// Список файлов
+	// РЎРїРёСЃРѕРє С„Р°Р№Р»РѕРІ
 	string pbMask(pbdir);
 	pbMask.append("\\*.pbl");
 
@@ -77,10 +77,10 @@ void ScanDirectory_pbl(std::string pbdir, std::map<std::string, LibEntity> &voc)
 		return;
 	};
 
-	// Добавим путь
+	// Р”РѕР±Р°РІРёРј РїСѓС‚СЊ
 	string libPath;
 
-	// Теперь переберём библиотеки и наковыряем из них интересного
+	// РўРµРїРµСЂСЊ РїРµСЂРµР±РµСЂС‘Рј Р±РёР±Р»РёРѕС‚РµРєРё Рё РЅР°РєРѕРІС‹СЂСЏРµРј РёР· РЅРёС… РёРЅС‚РµСЂРµСЃРЅРѕРіРѕ
 	for (list<string>::iterator i = libList.begin(); i != libList.end(); i++ ) {
 		libPath = pbdir;
 		libPath.append("\\").append(*i);
@@ -101,7 +101,7 @@ void ScanEntryDates(string libPath, map<string, LibEntity> &voc) {
 	short entNameLen;
 	string entName;
 	
-	// Поднимем файл библиотеки в память
+	// РџРѕРґРЅРёРјРµРј С„Р°Р№Р» Р±РёР±Р»РёРѕС‚РµРєРё РІ РїР°РјСЏС‚СЊ
 	vector<char> buf;
 	{
 		ifstream f(libPath, std::ifstream::binary);
@@ -124,20 +124,20 @@ void ScanEntryDates(string libPath, map<string, LibEntity> &voc) {
 			continue;
 		};
 
-		if (i == entBeginLen) {									// Нашли сущность
+		if (i == entBeginLen) {									// РќР°С€Р»Рё СЃСѓС‰РЅРѕСЃС‚СЊ
 			h = (ENTRY_HEADER*) &( *(p-entBeginLen+1) );
 
-			// Получим имя
+			// РџРѕР»СѓС‡РёРј РёРјСЏ
 			entNameLen = h->EntryNameLen;
 
 			entName.resize(entNameLen-1, 0);
 			copy(h->EntryName, h->EntryName+(entNameLen-1), entName.begin() );
 
-			// Ищем только исходники
+			// РС‰РµРј С‚РѕР»СЊРєРѕ РёСЃС…РѕРґРЅРёРєРё
 			int dotPos = entName.find_last_of('.');
 			
 			if (entName.substr(dotPos, 3) == ".sr" ) {
-				// Получим дату
+				// РџРѕР»СѓС‡РёРј РґР°С‚Сѓ
 				entDate = h->UnixDatetime;
 
 				string pureEntName(entName.substr(0, dotPos) );
@@ -168,7 +168,7 @@ void ScanDirectory_src(std::string dir, std::map<std::string, LibEntity> &voc) {
 		return;
 	};
 	
-	// Список каталогов
+	// РЎРїРёСЃРѕРє РєР°С‚Р°Р»РѕРіРѕРІ
 	for (list<string>::iterator d=dirList.begin(); d!=dirList.end(); d++ ) {
 		subdir = dir + "\\" + *d;
 		subdirList.clear();
@@ -180,9 +180,9 @@ void ScanDirectory_src(std::string dir, std::map<std::string, LibEntity> &voc) {
 			subdirList.clear();
 		};
 
-		// Список файлов в каталогах, соответствующих библиотекам
+		// РЎРїРёСЃРѕРє С„Р°Р№Р»РѕРІ РІ РєР°С‚Р°Р»РѕРіР°С…, СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёС… Р±РёР±Р»РёРѕС‚РµРєР°Рј
 		for(list<string>::iterator f=subdirList.begin(); f!=subdirList.end(); f++ ) {
-			transform(f->begin(), f->end(), f->begin(), tolower);	// Имя файла -- в нижний регистр
+			transform(f->begin(), f->end(), f->begin(), tolower);	// РРјСЏ С„Р°Р№Р»Р° -- РІ РЅРёР¶РЅРёР№ СЂРµРіРёСЃС‚СЂ
 
 			int dotPos = f->find_last_of('.');
 			string pureEntName(f->substr(0, dotPos) );
@@ -215,11 +215,11 @@ PBORCA_TYPE GetPBTypeByName(string& entName) {
 		if (entExt==".srj") return PBORCA_PROJECT;		// .srj
 	};
 
-	string buf("Не удалось определить тип для объекта с именем ");
+	string buf("РќРµ СѓРґР°Р»РѕСЃСЊ РѕРїСЂРµРґРµР»РёС‚СЊ С‚РёРї РґР»СЏ РѕР±СЉРµРєС‚Р° СЃ РёРјРµРЅРµРј ");
 	buf.append(entName);
 	throw PBException(buf);
 
-	return PBORCA_BINARY; // Недостижимо
+	return PBORCA_BINARY; // РќРµРґРѕСЃС‚РёР¶РёРјРѕ
 };
 
 string GetExtByPBType(PBORCA_TYPE t) {
@@ -254,7 +254,7 @@ std::string GetLibName(std::string libPath) {
 	int dotPos = libPath.find_last_of('.');
 
 	if (slashPos == string::npos ) slashPos = -1;
-	if (dotPos <= slashPos+1 ) throw PBException(string("Не удалось определить имя библиотеки для файла '") + libPath + "'");
+	if (dotPos <= slashPos+1 ) throw PBException(string("РќРµ СѓРґР°Р»РѕСЃСЊ РѕРїСЂРµРґРµР»РёС‚СЊ РёРјСЏ Р±РёР±Р»РёРѕС‚РµРєРё РґР»СЏ С„Р°Р№Р»Р° '") + libPath + "'");
 
 	return libPath.substr(slashPos+1, dotPos - slashPos - 1);
 };
@@ -266,7 +266,7 @@ string DescribePBError(long errCode) {
 			GetUserDefaultLangID(), buf, MAX_ERR_BUF_LEN, 0) )
 	{
 		TCHAR buf_num[256];
-		strcpy(buf, "Ошибка. Код ошибки = " );
+		strcpy(buf, "РћС€РёР±РєР°. РљРѕРґ РѕС€РёР±РєРё = " );
 		strncat(buf, ltoa(errCode, buf_num, 10), MAX_ERR_BUF_LEN );
 	}
 
