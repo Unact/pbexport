@@ -1,6 +1,6 @@
 #include "Args.h"
 
-Args::Args(int argc, char* argv[]): full(false), help(false), pbl2src(false), src2pbl(false), recompCount(0)
+Args::Args(int argc, char* argv[]): full(false), help(false), pbl2src(false), src2pbl(false), sync(false), recompCount(0)
 {
 	for (int i=1; i<argc; i++) {
 		if (!strncmp(argv[i], "--full", 7) ) full = true;		
