@@ -30,6 +30,7 @@ const int MAX_PBCODE_BUFFER = 1024*1024*2;
 
 int DoImport(Args& args);
 int DoExport(Args& args);
+int DoSync(Args& args);
 
 void CALLBACK PBCompErr( PBORCA_COMPERR* err, LPVOID uData);	// Для вызова PBORCA_CompileEntryImportList
 
@@ -39,7 +40,12 @@ int main (int argc, char* argv[]){
 	Args args(argc, argv);
 
 	if (args.help) {
-		cout << "Экспорт:" << endl <<
+		cout << "Подготовка к работе:" << endl <<
+			"  --sync" << endl <<
+			"  --pbl-<каталог с библиотеками>" << endl <<
+			"  --src-<каталог для исходников>" << endl <<
+			endl <<
+			"Экспорт:" << endl <<
 			"  --pbl2src" << endl <<
 			"  --pbl-<каталог с библиотеками>" << endl <<
 			"  --src-<каталог для исходников>" << endl <<
@@ -56,8 +62,8 @@ int main (int argc, char* argv[]){
 		return RES_OK;
 	};
 
-	if ( (args.pbl2src && args.src2pbl)  || (!args.pbl2src && !args.src2pbl) ) {
-		cout << "Должен быть определён один и только один ключ из пары {--src2pbl, --pbl2src}" << endl;
+	if ( int(args.pbl2src) + int(args.src2pbl) + int(args.sync) != 1 ) {
+		cout << "Должен быть определён один и только один ключ из множества {--sync, --src2pbl, --pbl2src}" << endl;
 		return RES_BADARGUMENTS;
 	};
 
@@ -96,7 +102,8 @@ int main (int argc, char* argv[]){
 
 	try {
 		if (args.pbl2src) res = DoExport(args);
-		if (args.src2pbl) res = DoImport(args);		
+		if (args.src2pbl) res = DoImport(args);
+		if (args.sync) res = DoSync(args);
 	}
 	catch (PBException e) {
 		cout << "Неприятность: " << e.what() << endl;
@@ -429,3 +436,25 @@ int DoImport(Args& args){
 
 	return res;
 };
+
+int DoSync(Args& args) {
+	int res = 0;
+
+	map<string, LibEntity> voc;
+
+	ScanDirectory_pbl(args.pbl, voc);
+	ScanDirectory_src(args.src, voc);
+
+	// Поменяем атрибуты исходных файлов так, чтобы дата изменения соответствовала дате изменения объекта в библиотеке PB
+	cout << "------- Синхронизация: -------" << endl;
+	for (map<string, LibEntity>::iterator i = voc.begin(); i != voc.end(); ++i )
+		if ( ! i->second.srcPath.empty() && ! i->second.libPath.empty() // Объект есть и в библиотеке PB, и в исходных файлах
+				&& i->second.fileDate != i->second.libDate ) { 
+			cout << i->second.srcPath << endl;
+			SetModificationDate(i->second.srcPath, i->second.libDate );
+		}
+	cout << "------------------------------" << endl;
+	cout << "Синхронизация успешно завершена" << endl;
+
+	return res;
+}

@@ -14,5 +14,6 @@ public:
 	bool help;
 	bool pbl2src;
 	bool src2pbl;
+	bool sync;
 	int recompCount;
 };
