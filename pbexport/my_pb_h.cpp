@@ -213,6 +213,7 @@ PBORCA_TYPE GetPBTypeByName(string& entName) {
 		if (entExt==".srq") return PBORCA_QUERY;		// .srq
 		if (entExt==".srp") return PBORCA_PIPELINE;		// .srp
 		if (entExt==".srj") return PBORCA_PROJECT;		// .srj
+        if (entExt==".srx") return PBORCA_PROXYOBJECT;	// .srx
 	};
 
 	string buf("Не удалось определить тип для объекта с именем ");
@@ -244,6 +245,8 @@ string GetExtByPBType(PBORCA_TYPE t) {
 			return ".srp";
 		case PBORCA_PROJECT:
 			return ".srj";
+        case PBORCA_PROXYOBJECT:
+			return ".srx";
 		default:
 			return ".unknown";
 	};
