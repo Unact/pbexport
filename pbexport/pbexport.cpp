@@ -182,7 +182,6 @@ int DoExport(Args& args){
 	for ( list<map<string, LibEntity>::iterator>::iterator ii = needsExport.begin(); ii != needsExport.end(); ++ii ) {
 		BuildPath( CatalogFromPath((*ii)->second.srcPath) );
 
-		//ofstream f((*ii)->second.srcPath, std::ios_base::binary | std::ios_base::out);	// см. ios_base::failure,  f.failbit
 		f.open((*ii)->second.srcPath, std::ios_base::binary | std::ios_base::out);
 		if (f.fail() ) {
 			cout << "Не удалось открыть на запись файл '" << (*ii)->second.srcPath << "'" << endl;

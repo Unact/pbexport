@@ -95,7 +95,7 @@ void WINAPI DirCallback(PPBORCA_DIRENTRY libItem, LPVOID uData)
 };
 
 void ScanEntryDates(string libPath, map<string, LibEntity> &voc) {
-	char entBegin[]="ENT*0600";
+	char entBegin[]="ENT*0v00"; // v == (4 || 5 || 6)
 	long entBeginLen=8;
 	long entDate;
 	short entNameLen;
@@ -117,7 +117,7 @@ void ScanEntryDates(string libPath, map<string, LibEntity> &voc) {
 	ENTRY_HEADER *h;
 
 	for (vector<char>::iterator p = buf.begin(); p != buf.end(); p++ ) {
-		if (*p == entBegin[i]) 
+		if ( (i != 5 && *p == entBegin[i]) || (i == 5 && *p >= '4' && *p <= '6' ) )
 			i ++;
 		else {
 			i=0;
