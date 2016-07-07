@@ -8,27 +8,27 @@
 
 class LibEntity {
 public:
-	std::string entName;			// РРјСЏ РѕР±СЉРµРєС‚Р°
-	std::string entCode;			// РСЃС…РѕРґРЅС‹Р№ РєРѕРґ
-	std::string entComment;			// РљРѕРјРјРµРЅС‚Р°СЂРёР№
-	PBORCA_TYPE entType;			// РўРёРї РѕР±СЉРµРєС‚Р°
+	std::string entName;			// Имя объекта
+	std::string entCode;			// Исходный код
+	std::string entComment;			// Комментарий
+	PBORCA_TYPE entType;			// Тип объекта
 
-	std::string entCode_backup;		// РџРѕРЅР°РґРѕР±РёС‚СЃСЏ РїСЂРё РЅРµСѓРґР°С‡РЅРѕР№ РїРѕРїС‹С‚РєРµ Р·Р°РіСЂСѓР·РєРё РЅРѕРІС‹С… РёСЃС…РѕРґРЅРёРєРѕРІ
+	std::string entCode_backup;		// Понадобится при неудачной попытке загрузки новых исходников
 	std::string entComment_backup;	//
 
-	int compileRes;					// 0, РµСЃР»Рё СѓРґР°С‡РЅРѕ Р·Р°РіСЂСѓР¶РµРЅ РІ Р±РёР±Р»РёРѕС‚РµРєСѓ
+	int compileRes;					// 0, если удачно загружен в библиотеку
 
-	std::string libPath;			// РџСѓС‚СЊ Рє Р±РёР±Р»РёРѕС‚РµРєРµ, РІ РєРѕС‚РѕСЂРѕР№ СЃРѕРґРµСЂР¶РёС‚СЃСЏ РѕР±СЉРµРєС‚
-	long libDate;					// Р”Р°С‚Р° РјРѕРґРёС„РёРєР°С†РёРё РёСЃС…РѕРґРЅРёРєР° РІ Р±РёР±Р»РёРѕС‚РµРєРµ (UNIX-С„РѕСЂРјР°С‚)
-	long libDateOffset;				// РЎРјРµС‰РµРЅРёРµ 4-Р±Р°Р№С‚РѕРІРѕР№ РґР°С‚С‹ РёСЃС…РѕРґРЅРёРєР° РІ pbl-С„Р°Р№Р»Рµ
+	std::string libPath;			// Путь к библиотеке, в которой содержится объект
+	long libDate;					// Дата модификации исходника в библиотеке (UNIX-формат)
+	long libDateOffset;				// Смещение 4-байтовой даты исходника в pbl-файле
 
-	std::string srcPath;			// РџСѓС‚СЊ Рє С„Р°Р№Р»Сѓ СЃ РёСЃС…РѕРґРЅС‹Рј РєРѕРґРѕРј
-	long fileDate;					// Р”Р°С‚Р° РјРѕРґРёС„РёРєР°С†РёРё С„Р°Р№Р»Р° СЃ РёСЃС…РѕРґРЅС‹Рј РєРѕРґРѕРј (UNIX-С„РѕСЂРјР°С‚)
+	std::string srcPath;			// Путь к файлу с исходным кодом
+	long fileDate;					// Дата модификации файла с исходным кодом (UNIX-формат)
 
-	LibEntity() : compileRes(0), libDate(0), fileDate(0), entType(PBORCA_BINARY), libDateOffset(0) {}; // РЎС‡РёС‚Р°СЋ, С‡С‚Рѕ PBORCA_BINARY -- РЅР°Рј РЅРµ РЅСѓР¶РЅР°СЏ СЃСѓС‰РЅРѕСЃС‚СЊ, РїСѓСЃС‚СЊ Р±СѓРґРµС‚ РёРЅРґРёРєР°С‚РѕСЂРѕРј РїСѓСЃС‚РѕС‚С‹
+	LibEntity() : compileRes(0), libDate(0), fileDate(0), entType(PBORCA_BINARY), libDateOffset(0) {}; // Считаю, что PBORCA_BINARY -- нам не нужная сущность, пусть будет индикатором пустоты
 };
 
-// РСЃРєР»СЋС‡РµРЅРёРµ "С‡С‚Рѕ-С‚Рѕ РїСЂРѕРёР·РѕС€Р»Рѕ РЅР° СЌС‚Р°РїРµ СЂР°Р±РѕС‚С‹ СЃ Р±РёР±Р»РёРѕС‚РµРєР°РјРё PB"
+// Исключение "что-то произошло на этапе работы с библиотеками PB"
 class PBException: public std::exception {
 		std::string mes;
 public:
@@ -37,7 +37,7 @@ public:
 	~PBException();
 };
 
-// Р§С‚РѕР±С‹ РѕС‚РєСЂС‹С‚Р°СЏ СЃРµСЃСЃРёСЏ РІСЃРµРіРґР° Р·Р°РєСЂС‹РІР°Р»Р°СЃСЊ
+// Чтобы открытая сессия всегда закрывалась
 class PBSessionHandle {
 	HPBORCA _h;
 public:
@@ -46,12 +46,12 @@ public:
 	HPBORCA h() { return _h; };
 };
 
-std::string DescribePBError(long errCode);	// РћРїРёСЃР°РЅРёРµ РѕС€РёР±РєРё СЃ РєРѕРґРѕРј
+std::string DescribePBError(long errCode);	// Описание ошибки с кодом
 
-void ScanDirectory_pbl(std::string dir, std::map<std::string, LibEntity> &voc);	// Р СѓРіР°СЋС‚СЃСЏ РІ std::cout
+void ScanDirectory_pbl(std::string dir, std::map<std::string, LibEntity> &voc);	// Ругаются в std::cout
 void ScanDirectory_src(std::string dir, std::map<std::string, LibEntity> &voc);	//
 
 std::string GetLibName(std::string libPath);
-PBORCA_TYPE GetPBTypeByName(std::string& entName);	// РњРѕР¶РµС‚ РєРёРЅСѓС‚СЊ PBException
+PBORCA_TYPE GetPBTypeByName(std::string& entName);	// Может кинуть PBException
 std::string GetExtByPBType(PBORCA_TYPE t);
 std::string GetPBError(HPBORCA s);

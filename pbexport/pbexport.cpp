@@ -1,4 +1,4 @@
-// pbexport.cpp: РѕРїСЂРµРґРµР»СЏРµС‚ С‚РѕС‡РєСѓ РІС…РѕРґР° РґР»СЏ РєРѕРЅСЃРѕР»СЊРЅРѕРіРѕ РїСЂРёР»РѕР¶РµРЅРёСЏ.
+// pbexport.cpp: определяет точку входа для консольного приложения.
 //
 
 #include "stdafx.h"
@@ -32,58 +32,58 @@ int DoImport(Args& args);
 int DoExport(Args& args);
 int DoSync(Args& args);
 
-void CALLBACK PBCompErr( PBORCA_COMPERR* err, LPVOID uData);	// Р”Р»СЏ РІС‹Р·РѕРІР° PBORCA_CompileEntryImportList
+void CALLBACK PBCompErr( PBORCA_COMPERR* err, LPVOID uData);	// Для вызова PBORCA_CompileEntryImportList
 
 int main (int argc, char* argv[]){
-	setlocale(LC_CTYPE, "rus");	// РљРѕРґРѕРІР°СЏ СЃС‚СЂР°РЅРёС†Р° РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
+	setlocale(LC_CTYPE, "rus");	// Кодовая страница по умолчанию
 
 	Args args(argc, argv);
 
 	if (args.help) {
-		cout << "РџРѕРґРіРѕС‚РѕРІРєР° Рє СЂР°Р±РѕС‚Рµ:" << endl <<
+		cout << "Подготовка к работе:" << endl <<
 			"  --sync" << endl <<
-			"  --pbl-<РєР°С‚Р°Р»РѕРі СЃ Р±РёР±Р»РёРѕС‚РµРєР°РјРё>" << endl <<
-			"  --src-<РєР°С‚Р°Р»РѕРі РґР»СЏ РёСЃС…РѕРґРЅРёРєРѕРІ>" << endl <<
+			"  --pbl-<каталог с библиотеками>" << endl <<
+			"  --src-<каталог для исходников>" << endl <<
 			endl <<
-			"Р­РєСЃРїРѕСЂС‚:" << endl <<
+			"Экспорт:" << endl <<
 			"  --pbl2src" << endl <<
-			"  --pbl-<РєР°С‚Р°Р»РѕРі СЃ Р±РёР±Р»РёРѕС‚РµРєР°РјРё>" << endl <<
-			"  --src-<РєР°С‚Р°Р»РѕРі РґР»СЏ РёСЃС…РѕРґРЅРёРєРѕРІ>" << endl <<
+			"  --pbl-<каталог с библиотеками>" << endl <<
+			"  --src-<каталог для исходников>" << endl <<
 			"  [--full]" << endl <<
 			endl <<
-			"РРјРїРѕСЂС‚:" << endl <<
+			"Импорт:" << endl <<
 			"  --src2pbl" << endl <<
-			"  --pbl-<РєР°С‚Р°Р»РѕРі СЃ Р±РёР±Р»РёРѕС‚РµРєР°РјРё>" << endl <<
-			"  --src-<РєР°С‚Р°Р»РѕРі c РёСЃС…РѕРґРЅРёРєР°РјРё>" << endl <<
-			"  --backup-<РєР°С‚Р°Р»РѕРі РґР»СЏ СЂРµР·РµСЂРІРЅРѕР№ РєРѕРїРёРё Р±РёР±Р»РёРѕС‚РµРє>" << endl <<
-			"  --appl-<РёРјСЏ РїСЂРёР»РѕР¶РµРЅРёСЏ>" << endl <<
-			"  [--recomp-<СЃРєРѕР»СЊРєРѕ СЂР°Р· РїРµСЂРµРєРѕРјРїРёР»РёСЂРѕРІР°С‚СЊ РѕР±СЉРµРєС‚С‹, РЅРµ СЃРєРѕРјРїРёР»РёСЂРѕРІР°РЅРЅС‹Рµ СЃСЂР°Р·Сѓ>]" << endl <<
+			"  --pbl-<каталог с библиотеками>" << endl <<
+			"  --src-<каталог c исходниками>" << endl <<
+			"  --backup-<каталог для резервной копии библиотек>" << endl <<
+			"  --appl-<имя приложения>" << endl <<
+			"  [--recomp-<сколько раз перекомпилировать объекты, не скомпилированные сразу>]" << endl <<
 			"  [--full]" << std::endl;
 		return RES_OK;
 	};
 
 	if ( int(args.pbl2src) + int(args.src2pbl) + int(args.sync) != 1 ) {
-		cout << "Р”РѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕРїСЂРµРґРµР»С‘РЅ РѕРґРёРЅ Рё С‚РѕР»СЊРєРѕ РѕРґРёРЅ РєР»СЋС‡ РёР· РјРЅРѕР¶РµСЃС‚РІР° {--sync, --src2pbl, --pbl2src}" << endl;
+		cout << "Должен быть определён один и только один ключ из множества {--sync, --src2pbl, --pbl2src}" << endl;
 		return RES_BADARGUMENTS;
 	};
 
 	if (args.pbl.empty() ) {
-		cout << "РќРµ Р·Р°РґР°РЅ РєР°С‚Р°Р»РѕРі СЃ С„Р°Р№Р»Р°РјРё PBL" << endl;
+		cout << "Не задан каталог с файлами PBL" << endl;
 		return RES_BADARGUMENTS;
 	};	
 
 	if (args.src.empty() ) {
-		cout << "РќРµ Р·Р°РґР°РЅ РєР°С‚Р°Р»РѕРі СЃ РёСЃС…РѕРґРЅС‹РјРё С„Р°Р№Р»Р°РјРё" << endl;
+		cout << "Не задан каталог с исходными файлами" << endl;
 		return RES_BADARGUMENTS;
 	};
 
 	if (args.src2pbl && args.appl.empty() ) {
-		cout << "РќРµРѕР±С…РѕРґРёРјРѕ Р·Р°РґР°С‚СЊ РёРјСЏ РїСЂРёР»РѕР¶РµРЅРёСЏ" << endl;
+		cout << "Необходимо задать имя приложения" << endl;
 		return RES_BADARGUMENTS;
 	};
 
 	if (args.src2pbl && args.backup.empty() ) {
-		cout << "РќРµРѕР±С…РѕРґРёРјРѕ СѓРєР°Р·Р°С‚СЊ РєР°С‚Р°Р»РѕРі РґР»СЏ СЂРµР·РµСЂРІРЅРѕРіРѕ РєРѕРїРёСЂРѕРІР°РЅРёСЏ" << endl;
+		cout << "Необходимо указать каталог для резервного копирования" << endl;
 		return RES_BADARGUMENTS;
 	};
 
@@ -93,7 +93,7 @@ int main (int argc, char* argv[]){
 	orcalib = LoadLibrary("pborc90.dll" );
 	if (orcalib == NULL) {
 		int errCode = GetLastError();
-		cout << "РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ Р±РёР±Р»РёРѕС‚РµРєСѓ pborc90.dll" << endl;
+		cout << "Не удалось загрузить библиотеку pborc90.dll" << endl;
 		
 		return RES_CANNOTLOADORCALIBRARY;
 	};
@@ -106,11 +106,11 @@ int main (int argc, char* argv[]){
 		if (args.sync) res = DoSync(args);
 	}
 	catch (PBException e) {
-		cout << "РќРµРїСЂРёСЏС‚РЅРѕСЃС‚СЊ: " << e.what() << endl;
+		cout << "Неприятность: " << e.what() << endl;
 		return RES_EXCEPTION;
 	}
 	catch (exception e) {
-		cout << "РќРµРёР·РІРµСЃС‚РЅР°СЏ РЅРµРїСЂРёСЏС‚РЅРѕСЃС‚СЊ: " << e.what() << endl;
+		cout << "Неизвестная неприятность: " << e.what() << endl;
 		return RES_EXCEPTION;
 	}
 
@@ -126,10 +126,10 @@ void CALLBACK PBCompErr( PBORCA_COMPERR* err, LPVOID uData) {
 	int* pCompRes = reinterpret_cast<int*> (uData);
 	*pCompRes = 1;
 
-	cout << "РћС€РёР±РєР° РєРѕРјРїРёР»РёСЂРѕРІР°РЅРёСЏ: ";
-	if (err->iLevel) cout << " СѓСЂРѕРІРµРЅСЊ:" << err->iLevel;
-	if (err->iLineNumber) cout << " СЃС‚СЂРѕРєР°:" << err->iLineNumber;
-	if (err->iColumnNumber) cout << " СЃС‚РѕР»Р±РµС†:" << err->iColumnNumber;
+	cout << "Ошибка компилирования: ";
+	if (err->iLevel) cout << " уровень:" << err->iLevel;
+	if (err->iLineNumber) cout << " строка:" << err->iLineNumber;
+	if (err->iColumnNumber) cout << " столбец:" << err->iColumnNumber;
 	if (err->lpszMessageNumber != NULL) cout << err->lpszMessageNumber << " ";
 	if (err->lpszMessageText != NULL) cout << err->lpszMessageText;
 	cout << endl;
@@ -144,38 +144,38 @@ int DoExport(Args& args){
 	BuildPath(args.src);
 	ScanDirectory_src(args.src, voc);
 
-	// РћС‚Р±РµСЂС‘Рј С‚РµС…, РєРѕРіРѕ РЅСѓР¶РЅРѕ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°С‚СЊ:
-	list<map<string, LibEntity>::iterator> needsExport; // РЎРїРёСЃРѕРє СѓРєР°Р·Р°С‚РµР»РµР№ РЅР° СЌР»РµРјРµРЅС‚С‹ voc, РєРѕС‚РѕСЂС‹Рµ РЅСѓР¶РЅРѕ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°С‚СЊ
+	// Отберём тех, кого нужно экспортировать:
+	list<map<string, LibEntity>::iterator> needsExport; // Список указателей на элементы voc, которые нужно экспортировать
 
 	if (args.full) { 
-		// РѕС‚Р±РµСЂС‘Рј РІСЃРµС…, СѓРїРѕРјСЏРЅСѓС‚С‹С… РІ Р±РёР±Р»РёРѕС‚РµРєР°С…
+		// отберём всех, упомянутых в библиотеках
 		for (map<string, LibEntity>::iterator i = voc.begin(); i != voc.end(); ++i )
 			if ( ! i->second.libPath.empty() ) needsExport.push_back(i);
 	} else {
-		// РѕС‚Р±РµСЂС‘Рј РІСЃРµС…, РґР»СЏ РєРѕС‚РѕСЂС‹С… РґР°С‚Р° РІ Р±РёР±Р»РёРѕС‚РµРєРµ Р±РѕР»СЊС€Рµ РґР°С‚С‹ С„Р°Р№Р»Р° РІ РєР°С‚Р°Р»РѕРіРµ РёСЃС…РѕРґРЅРёРєРѕРІ (РёР»Рё С‚Р°РєРѕРіРѕ С„Р°Р№Р»Р° РЅРµС‚)
+		// отберём всех, для которых дата в библиотеке больше даты файла в каталоге исходников (или такого файла нет)
 		for (map<string, LibEntity>::iterator i = voc.begin(); i != voc.end(); ++i )
-			if ( i->second.libDate > i->second.fileDate ) needsExport.push_back(i); // Р•СЃР»Рё С„Р°Р№Р»Р° РЅРµС‚ -- РёР· Р»РѕРіРёРєРё РїРѕСЃС‚СЂРѕРµРЅРёСЏ (voc) РµРіРѕ .fileDate РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ 0
+			if ( i->second.libDate > i->second.fileDate ) needsExport.push_back(i); // Если файла нет -- из логики построения (voc) его .fileDate должно быть 0
 	};
 
-	// Р’СЃРµРј, Сѓ РєРѕРіРѕ РЅРµС‚ РёСЃС…РѕРґРЅРѕРіРѕ С„Р°Р№Р»Р°, РЅСѓР¶РЅРѕ СЃС„РѕСЂРјРёСЂРѕРІР°С‚СЊ РїСѓС‚СЊ Рє РЅРµРјСѓ
+	// Всем, у кого нет исходного файла, нужно сформировать путь к нему
 	for ( list<map<string, LibEntity>::iterator>::iterator ii = needsExport.begin(); ii != needsExport.end(); ++ii )
 		if ( (*ii)->second.srcPath.empty() ) {
 			(*ii)->second.srcPath = args.src + "\\" + GetLibName((*ii)->second.libPath) + "\\" + (*ii)->second.entName + GetExtByPBType((*ii)->second.entType) ;
 		};
 
-	// Р СЌРєСЃРїРѕСЂС‚РёСЂСѓРµРј
-	cout << "------------- Р­РєСЃРїРѕСЂС‚: --------------" << endl;
+	// И экспортируем
+	cout << "------------- Экспорт: --------------" << endl;
 	for ( list<map<string, LibEntity>::iterator>::iterator ii = needsExport.begin(); ii != needsExport.end(); ++ii )
 		cout << (*ii)->second.srcPath << endl;
 	cout << "------------------------------------" << endl;
 
-	// РџРѕР»СѓС‡РёРј РёСЃС…РѕРґРЅРёРєРё РёР· PB
+	// Получим исходники из PB
 	PBSessionHandle s(PBORCA_SessionOpen() );
 	if (!s.h() ) {		
-		throw PBException("РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ СЃРµСЃСЃРёСЋ PBORCA" );
+		throw PBException("Не удалось открыть сессию PBORCA" );
 	};
 
-	string codeBuf(MAX_PBCODE_BUFFER, 0);	// РўР°Рј РјРѕР¶РµС‚ Р±С‹С‚СЊ РјРЅРѕРіРѕ -- РЅРµ С…РѕС‡Сѓ СЃРѕР·РґР°РІР°С‚СЊ Р±СѓС„РµСЂ РІ СЃС‚РµРєРµ
+	string codeBuf(MAX_PBCODE_BUFFER, 0);	// Там может быть много -- не хочу создавать буфер в стеке
 	PBORCA_ENTRYINFO commentBuf;
 	ofstream f;
 	long err;
@@ -184,38 +184,38 @@ int DoExport(Args& args){
 
 		f.open((*ii)->second.srcPath, std::ios_base::binary | std::ios_base::out);
 		if (f.fail() ) {
-			cout << "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РЅР° Р·Р°РїРёСЃСЊ С„Р°Р№Р» '" << (*ii)->second.srcPath << "'" << endl;
+			cout << "Не удалось открыть на запись файл '" << (*ii)->second.srcPath << "'" << endl;
 			res = 1;
 			continue;
 		}
 
-		// Р—Р°РіРѕР»РѕРІРѕРє
+		// Заголовок
 		f.write("$PBExportHeader$", 16);
 		f.write((*ii)->second.entName.data(), (*ii)->second.entName.length() );
 		f.write(GetExtByPBType((*ii)->second.entType).data(), 4);
 		f.write("\x0D\x0A", 2);
 
-		// РљРѕРјРјРµРЅС‚Р°СЂРёР№
+		// Комментарий
 		if (err = PBORCA_LibraryEntryInformation(s.h(), 
 			const_cast<char*>((*ii)->second.libPath.c_str() ), 
 			const_cast<char*>((*ii)->second.entName.c_str() ),
 			(*ii)->second.entType, &commentBuf ) ) {
-			cout << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ '" << (*ii)->second.libPath << "'." << (*ii)->second.entName << " :" << DescribePBError(err);
+			cout << "Не удалось получить информацию о '" << (*ii)->second.libPath << "'." << (*ii)->second.entName << " :" << DescribePBError(err);
 			res = 1;
 		} else {
-			if (commentBuf.szComments[0] ) {	// РљРѕРјРјРµРЅС‚Р°СЂРёР№ РµСЃС‚СЊ
+			if (commentBuf.szComments[0] ) {	// Комментарий есть
 				f.write("$PBExportComments$", 18);
 				f.write(commentBuf.szComments, strlen(commentBuf.szComments) );
 				f.write("\x0D\x0A", 2);
 			};
 		};
 
-		// РљРѕРґ
+		// Код
 		if (err = PBORCA_LibraryEntryExport(s.h(), const_cast<char*>((*ii)->second.libPath.c_str() ), 
 			const_cast<char*>((*ii)->second.entName.c_str() ),
 			(*ii)->second.entType,
 			const_cast<char*>(codeBuf.data() ), MAX_PBCODE_BUFFER) ) {
-				cout << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ '" << (*ii)->second.libPath << "'." << (*ii)->second.entName << " :" << DescribePBError(err);
+				cout << "Не удалось получить информацию о '" << (*ii)->second.libPath << "'." << (*ii)->second.entName << " :" << DescribePBError(err);
 				res = 1;
 		} 
 		else
@@ -227,9 +227,9 @@ int DoExport(Args& args){
 	};
 
 	if (res)
-		cout << "*** Р­РєСЃРїРѕСЂС‚ РІ С†РµР»РѕРј РЅРµСѓРґР°С‡РµРЅ" << endl;
+		cout << "*** Экспорт в целом неудачен" << endl;
 	else
-		cout << "Р­РєСЃРїРѕСЂС‚ Р·Р°РІРµСЂС€С‘РЅ" << endl;
+		cout << "Экспорт завершён" << endl;
 
 	return res;
 };
@@ -243,25 +243,25 @@ int DoImport(Args& args){
 	ScanDirectory_pbl(args.pbl, voc);
 	ScanDirectory_src(args.src, voc);
 
-	// РћС‚Р±РµСЂС‘Рј С‚РµС…, РєРѕРіРѕ РЅСѓР¶РЅРѕ РёРјРїРѕСЂС‚РёСЂРѕРІР°С‚СЊ
-	list<map<string, LibEntity>::iterator> needsImport; // РЎРїРёСЃРѕРє СѓРєР°Р·Р°С‚РµР»РµР№ РЅР° СЌР»РµРјРµРЅС‚С‹ voc, РєРѕС‚РѕСЂС‹Рµ РЅСѓР¶РЅРѕ РёРјРїРѕСЂС‚РёСЂРѕРІР°С‚СЊ
+	// Отберём тех, кого нужно импортировать
+	list<map<string, LibEntity>::iterator> needsImport; // Список указателей на элементы voc, которые нужно импортировать
 
 	if (args.full) { 
-		// РѕС‚Р±РµСЂС‘Рј РІСЃРµС…, СѓРїРѕРјСЏРЅСѓС‚С‹С… РІ РєР°С‚Р°Р»РѕРіРµ РёСЃС…РѕРґРЅРёРєРѕРІ
+		// отберём всех, упомянутых в каталоге исходников
 		for (map<string, LibEntity>::iterator i = voc.begin(); i != voc.end(); ++i )
 			if ( ! i->second.srcPath.empty() ) needsImport.push_back(i);
 	} else {
-		// РѕС‚Р±РµСЂС‘Рј РІСЃРµС…, РґР»СЏ РєРѕС‚РѕСЂС‹С… РґР°С‚Р° РІ Р±РёР±Р»РёРѕС‚РµРєРµ РјРµРЅСЊС€Рµ РґР°С‚С‹ С„Р°Р№Р»Р° РІ РєР°С‚Р°Р»РѕРіРµ РёСЃС…РѕРґРЅРёРєРѕРІ (РёР»Рё С‚Р°РєРѕРіРѕ РѕР±СЉРµРєС‚Р° РЅРµС‚ РІ Р±РёР±Р»РёРѕС‚РµРєРµ)
+		// отберём всех, для которых дата в библиотеке меньше даты файла в каталоге исходников (или такого объекта нет в библиотеке)
 		for (map<string, LibEntity>::iterator i = voc.begin(); i != voc.end(); ++i )
-			if ( i->second.libDate < i->second.fileDate ) needsImport.push_back(i); // Р•СЃР»Рё РѕР±СЉРµРєС‚Р° РЅРµС‚ -- РёР· Р»РѕРіРёРєРё РїРѕСЃС‚СЂРѕРµРЅРёСЏ (voc) РµРіРѕ .libDate РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ 0
+			if ( i->second.libDate < i->second.fileDate ) needsImport.push_back(i); // Если объекта нет -- из логики построения (voc) его .libDate должно быть 0
 	};
 
-	cout << "------------- РРјРїРѕСЂС‚: --------------" << endl;
+	cout << "------------- Импорт: --------------" << endl;
 	for ( list<map<string, LibEntity>::iterator>::iterator ii = needsImport.begin(); ii != needsImport.end(); ++ii )
 		cout << (*ii)->second.srcPath << endl;
 	cout << "------------------------------------" << endl;
 
-	// РЈРєР°Р¶РµРј Р±РёР±Р»РёРѕС‚РµРєСѓ РґР»СЏ РЅРѕРІС‹С… С„Р°Р№Р»РѕРІ
+	// Укажем библиотеку для новых файлов
 	for ( list<map<string, LibEntity>::iterator>::iterator ii = needsImport.begin(); ii != needsImport.end(); ++ii )
 		if( (*ii)->second.libPath.empty() ) {
 			string libName=FilenameFromPath(CatalogFromPath( (*ii)->second.srcPath ) );
@@ -269,57 +269,57 @@ int DoImport(Args& args){
 		};
 
 	if (needsImport.size() > 0 ) {
-		// РЎРґРµР»Р°РµРј СЂРµР·РµСЂРІРЅСѓСЋ РєРѕРїРёСЋ Р±РёР±Р»РёРѕС‚РµРє
+		// Сделаем резервную копию библиотек
 		if (CopyDirectory_pbl(args.pbl, args.backup) ) {
-			cout << "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ СЂРµР·РµСЂРІРЅСѓСЋ РєРѕРїРёСЋ Р±РёР±Р»РёРѕС‚РµРє. РџСЂРѕС†РµРґСѓСЂР° РёРјРїРѕСЂС‚Р° РѕСЃС‚Р°РЅРѕРІР»РµРЅР°. РР·РјРµРЅРµРЅРёР№ РІ Р±РёР±Р»РёРѕС‚РµРєР°С… РЅРµС‚" << endl;
+			cout << "Не удалось создать резервную копию библиотек. Процедура импорта остановлена. Изменений в библиотеках нет" << endl;
 			return 1;
 		};
 
-		// РџРѕРґРЅРёРјРµРј РёСЃС…РѕРґРЅРёРєРё РІ РїР°РјСЏС‚СЊ
+		// Поднимем исходники в память
 		for ( list<map<string, LibEntity>::iterator>::iterator ii = needsImport.begin(); ii != needsImport.end(); ++ii ) {
-			ifstream f( (*ii)->second.srcPath, std::ios_base::binary | std::ios_base::in );	// Р§С‚РѕР±С‹ РЅРµ Р·Р°РјРѕСЂР°С‡РёРІР°С‚СЊСЃСЏ СЃ Р·Р°РєСЂС‹С‚РёРµРј РїСЂРё РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРё continue РІ С†РёРєР»Рµ
+			ifstream f( (*ii)->second.srcPath, std::ios_base::binary | std::ios_base::in );	// Чтобы не заморачиваться с закрытием при использовании continue в цикле
 
 			if (f.fail() ) {
-				cout << "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РЅР° С‡С‚РµРЅРёРµ С„Р°Р№Р» '" << (*ii)->second.srcPath << "'" << endl;
+				cout << "Не удалось открыть на чтение файл '" << (*ii)->second.srcPath << "'" << endl;
 				res = 1;
 				continue;
 			};
 
-			// РџРѕРґРЅРёРјРµРј РІ Р±СѓС„РµСЂ
+			// Поднимем в буфер
 			string buf(
 				(std::istreambuf_iterator<char>(f)), 
 					std::istreambuf_iterator<char>()
 			);			
 
-			// Р’ С„Р°Р№Р»Рµ РїРµСЂРІРѕР№ СЃС‚СЂРѕРєРѕР№ РґРѕР»Р¶РЅРѕ РёРґС‚Рё РёРјСЏ РѕР±СЉРµРєС‚Р° Рё С„Р°Р№Р»Р°
+			// В файле первой строкой должно идти имя объекта и файла
 			string headTest("$PBExportHeader$");
 			headTest.append((*ii)->second.entName).append(GetExtByPBType((*ii)->second.entType ) );
 			if (headTest != buf.substr(0, headTest.length() ) ) {
-				cout << "РќР°С‡Р°Р»Рѕ С„Р°Р№Р»Р° '" << (*ii)->second.srcPath << "' РЅРµ СЃРѕРІРїР°РґР°РµС‚ СЃ РѕР¶РёРґР°РµРјС‹Рј" << endl;
+				cout << "Начало файла '" << (*ii)->second.srcPath << "' не совпадает с ожидаемым" << endl;
 				res = 1;
 				continue;
 			};
 
 			long codeStart = buf.find_first_of(13, 0);	// CR
 			if (codeStart == string::npos ) {
-				cout << "Р¤Р°Р№Р» '" << (*ii)->second.srcPath << "' : РЅРµ РЅР°Р№РґРµРЅ РєРѕРЅРµС† Р·Р°РіРѕР»РѕРІРєР°" << endl;
+				cout << "Файл '" << (*ii)->second.srcPath << "' : не найден конец заголовка" << endl;
 				res = 1;
 				continue;
 			};
-			codeStart += 2;	// РЎС‡РёС‚Р°РµРј, С‡С‚Рѕ СЃС‚СЂРѕРєРё РІ РёСЃС…РѕРґРЅРёРєРµ СЂР°Р·РґРµР»РµРЅС‹ CRLF
+			codeStart += 2;	// Считаем, что строки в исходнике разделены CRLF
 
-			// Р’РѕР·РјРѕР¶РЅРѕ, РІС‚РѕСЂРѕР№ СЃС‚СЂРѕРєРѕР№ РІ С„Р°Р№Р»Рµ Р±СѓРґРµС‚ РєРѕРјРјРµРЅС‚Р°СЂРёР№
+			// Возможно, второй строкой в файле будет комментарий
 			if (buf.substr(codeStart, 18) == "$PBExportComments$" ) {
 				long commentEnd = buf.find_first_of(13, codeStart);	// CR
 				if (commentEnd == string::npos ) {
-					cout << "Р¤Р°Р№Р» '" << (*ii)->second.srcPath << "' : РЅРµ РЅР°Р№РґРµРЅ РєРѕРЅРµС† РєРѕРјРјРµРЅС‚Р°СЂРёСЏ" << endl;
+					cout << "Файл '" << (*ii)->second.srcPath << "' : не найден конец комментария" << endl;
 					res = 1;
 					continue;
 				};
 
-				(*ii)->second.entComment.assign(buf.substr(codeStart+18, commentEnd - (codeStart+18) ) ); // 18 -- РґР»РёРЅР° Р·Р°РіРѕР»РѕРІРєР° РєРѕРјРјРµРЅС‚Р°СЂРёСЏ
+				(*ii)->second.entComment.assign(buf.substr(codeStart+18, commentEnd - (codeStart+18) ) ); // 18 -- длина заголовка комментария
 
-				codeStart = commentEnd + 2;	// РЎС‡РёС‚Р°РµРј, С‡С‚Рѕ СЃС‚СЂРѕРєРё РІ РёСЃС…РѕРґРЅРёРєРµ СЂР°Р·РґРµР»РµРЅС‹ CRLF
+				codeStart = commentEnd + 2;	// Считаем, что строки в исходнике разделены CRLF
 			};
 
 			(*ii)->second.entCode.assign(buf.substr(codeStart) );
@@ -327,43 +327,43 @@ int DoImport(Args& args){
 			f.close();
 		};
 
-		// Р•СЃР»Рё РЅРµ СѓРґР°Р»РѕСЃСЊ РїСЂРѕС‡РёС‚Р°С‚СЊ РёСЃС…РѕРґРЅРёРєРё -- РїСЂРµРєСЂР°С‰Р°РµРј СЂР°Р±РѕС‚Сѓ
+		// Если не удалось прочитать исходники -- прекращаем работу
 		if (res) {
-			cout << "РќРµ СѓРґР°Р»РѕСЃСЊ РїСЂРѕС‡РёС‚Р°С‚СЊ РёСЃС…РѕРґРЅС‹Р№ РєРѕРґ РёР· С„Р°Р№Р»РѕРІ. РџСЂРѕС†РµРґСѓСЂР° РёРјРїРѕСЂС‚Р° РѕСЃС‚Р°РЅРѕРІР»РµРЅР°. РР·РјРµРЅРµРЅРёР№ РІ Р±РёР±Р»РёРѕС‚РµРєР°С… РЅРµС‚." << endl;
+			cout << "Не удалось прочитать исходный код из файлов. Процедура импорта остановлена. Изменений в библиотеках нет." << endl;
 			return 1;
 		};
 
-		// РЎС„РѕСЂРјРёСЂСѓРµРј СЃРїРёСЃРѕРє Р±РёР±Р»РёРѕС‚РµРє РґР»СЏ СЃРµСЃСЃРёРё PBORCA
+		// Сформируем список библиотек для сессии PBORCA
 		list<string> libList;
 		ScanDirectory(args.pbl + "\\*.pbl", libList, false);
 		vector<char*> libListPtrs;
 		libListPtrs.reserve(libList.size() );
 
 		for( list<string>::iterator i = libList.begin(); i != libList.end(); ++i) {
-			*i = args.pbl + "\\" + *i;	// Р”РѕР±Р°РІРёРј РїСѓС‚Рё
+			*i = args.pbl + "\\" + *i;	// Добавим пути
 			libListPtrs.push_back(const_cast<char*>(i->c_str() ) );
 		};
 
-		// РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј СЃРµСЃСЃРёСЋ PBORCA
+		// Инициализируем сессию PBORCA
 		PBSessionHandle s(PBORCA_SessionOpen() );
 		if (!s.h() ) 
-			throw PBException("РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ СЃРµСЃСЃРёСЋ PBORCA" );
+			throw PBException("Не удалось открыть сессию PBORCA" );
 
-		// РЎРїРёСЃРѕРє Р±РёР±Р»РёРѕС‚РµРє
+		// Список библиотек
 		if (PBORCA_SessionSetLibraryList(s.h(), libListPtrs.data(), libListPtrs.size() ) ) 
-			throw PBException(string("РќРµ СѓРґР°Р»РѕСЃСЊ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЃРїРёСЃРѕРє Р±РёР±Р»РёРѕС‚РµРє РґР»СЏ СЃРµСЃСЃРёРё. ") + GetPBError(s.h() ) );
+			throw PBException(string("Не удалось установить список библиотек для сессии. ") + GetPBError(s.h() ) );
 
-		// РРјСЏ РїСЂРёР»РѕР¶РµРЅРёСЏ
+		// Имя приложения
 		{
 			map<string, LibEntity>::iterator pAppl;
 			if ( voc.end() == (pAppl = voc.find(args.appl) ) )
-				throw PBException(string("РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё Р±РёР±Р»РёРѕС‚РµРєСѓ СЃ РїСЂРёР»РѕР¶РµРЅРёРµРј '").append(args.appl).append("'") );
+				throw PBException(string("Не удалось найти библиотеку с приложением '").append(args.appl).append("'") );
 
 			if ( PBORCA_SessionSetCurrentAppl(s.h(), const_cast<char*>(pAppl->second.libPath.c_str() ), const_cast<char*>(args.appl.c_str() ) ) )
-				throw PBException(string("РќРµ СѓРґР°Р»РѕСЃСЊ СѓРєР°Р·Р°С‚СЊ РїСЂРёР»РѕР¶РµРЅРёРµ СЃРµСЃСЃРёРё: ") + GetPBError(s.h() ) );
+				throw PBException(string("Не удалось указать приложение сессии: ") + GetPBError(s.h() ) );
 		};
 
-		// ----Р—Р°РїСѓСЃРєР°РµРј РёРјРїРѕСЂС‚
+		// ----Запускаем импорт
 		for ( list<map<string, LibEntity>::iterator>::iterator ii = needsImport.begin(); ii != needsImport.end(); ++ii ) {
 			if (PBORCA_CompileEntryImport( s.h(),
 						const_cast<char*>( (*ii)->second.libPath.c_str() ),
@@ -382,10 +382,10 @@ int DoImport(Args& args){
 			};
 		};
 
-		// РџРµСЂРµРєРѕРјРїРёР»РёСЂСѓРµРј РѕР±СЉРµРєС‚С‹ СЃ РѕС€РёР±РєР°РјРё РЅСѓР¶РЅРѕРµ С‡РёСЃР»Рѕ СЂР°Р·
+		// Перекомпилируем объекты с ошибками нужное число раз
 		if (res)
 			for( int recomp = 1; recomp<=args.recompCount && res; recomp++ ) {
-				cout << "----РџРµСЂРµРєРѕРјРїРёР»СЏС†РёСЏ, РїРѕРїС‹С‚РєР° " << recomp << " ----" << endl;
+				cout << "----Перекомпиляция, попытка " << recomp << " ----" << endl;
 				res = 0;
 				for ( list<map<string, LibEntity>::iterator>::iterator ii = needsImport.begin(); ii != needsImport.end(); ++ii )
 					if ((*ii)->second.compileRes ) {
@@ -404,33 +404,33 @@ int DoImport(Args& args){
 					};
 			}; //for(recomp...)
 
-		// РћР±РЅРѕРІРёРј РґР°С‚С‹ РёСЃС…РѕРґРЅРёРєРѕРІ РІ Р±РёР±Р»РёРѕС‚РµРєР°С…
-		map<string, LibEntity> voc_res; // РџРѕСЃР»Рµ РёРјРїРѕСЂС‚Р° РїРѕС‚СЂРѕС…Р° Р±РёР±Р»РёРѕС‚РµРє РјРѕРіР»Рё РёР·РјРµРЅРёС‚СЊСЃСЏ
+		// Обновим даты исходников в библиотеках
+		map<string, LibEntity> voc_res; // После импорта потроха библиотек могли измениться
 		ScanDirectory_pbl(args.pbl, voc_res);
 
 		for ( list<map<string, LibEntity>::iterator>::iterator ii = needsImport.begin(); ii != needsImport.end(); ++ii )
 			if (voc_res[(*ii)->first].libDateOffset == 0) {
-				cout << "Р”Р°С‚Р° РјРѕРґРёС„РёРєР°С†РёРё РЅРµ РёСЃРїСЂР°РІР»РµРЅР°: РЅРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё РІ Р±РёР±Р»РёРѕС‚РµРєР°С… СЃСѓС‰РЅРѕСЃС‚СЊ '" << (*ii)->first << "'" << endl;
+				cout << "Дата модификации не исправлена: не удалось найти в библиотеках сущность '" << (*ii)->first << "'" << endl;
 				res = 1;
 			}
 			else
 			{
 				ofstream f((*ii)->second.libPath, std::ios_base::binary | std::ios_base::in);
 				if (f.fail() ) {
-					cout << "Р”Р°С‚Р° РјРѕРґРёС„РёРєР°С†РёРё '" << (*ii)->first << "' РЅРµ РёСЃРїСЂР°РІР»РµРЅР°: РЅРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РЅР° Р·Р°РїРёСЃСЊ С„Р°Р№Р» '" << (*ii)->second.srcPath << "'" << endl;
+					cout << "Дата модификации '" << (*ii)->first << "' не исправлена: не удалось открыть на запись файл '" << (*ii)->second.srcPath << "'" << endl;
 					res = 1;
 					continue;
 				};
 
 				f.seekp(voc_res[(*ii)->first].libDateOffset );
-				f.write(reinterpret_cast<char*>(&((*ii)->second.fileDate) ), 4); // РџРёС€РµРј РІ С„Р°Р№Р» РґР°С‚Сѓ -- РѕРЅР° long
+				f.write(reinterpret_cast<char*>(&((*ii)->second.fileDate) ), 4); // Пишем в файл дату -- она long
 				f.close();
 			}; // if( libDateOffset == 0 )			
 
 		if (res)
-			cout << "*** РРјРїРѕСЂС‚ РІ С†РµР»РѕРј РЅРµСѓРґР°С‡РµРЅ" << endl;
+			cout << "*** Импорт в целом неудачен" << endl;
 		else
-			cout << "РРјРїРѕСЂС‚ Р·Р°РІРµСЂС€С‘РЅ" << endl;
+			cout << "Импорт завершён" << endl;
 	}; // needsImport.size() > 0
 
 	return res;
@@ -444,16 +444,16 @@ int DoSync(Args& args) {
 	ScanDirectory_pbl(args.pbl, voc);
 	ScanDirectory_src(args.src, voc);
 
-	// РџРѕРјРµРЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹ РёСЃС…РѕРґРЅС‹С… С„Р°Р№Р»РѕРІ С‚Р°Рє, С‡С‚РѕР±С‹ РґР°С‚Р° РёР·РјРµРЅРµРЅРёСЏ СЃРѕРѕС‚РІРµС‚СЃС‚РІРѕРІР°Р»Р° РґР°С‚Рµ РёР·РјРµРЅРµРЅРёСЏ РѕР±СЉРµРєС‚Р° РІ Р±РёР±Р»РёРѕС‚РµРєРµ PB
-	cout << "------- РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ: -------" << endl;
+	// Поменяем атрибуты исходных файлов так, чтобы дата изменения соответствовала дате изменения объекта в библиотеке PB
+	cout << "------- Синхронизация: -------" << endl;
 	for (map<string, LibEntity>::iterator i = voc.begin(); i != voc.end(); ++i )
-		if ( ! i->second.srcPath.empty() && ! i->second.libPath.empty() // РћР±СЉРµРєС‚ РµСЃС‚СЊ Рё РІ Р±РёР±Р»РёРѕС‚РµРєРµ PB, Рё РІ РёСЃС…РѕРґРЅС‹С… С„Р°Р№Р»Р°С…
+		if ( ! i->second.srcPath.empty() && ! i->second.libPath.empty() // Объект есть и в библиотеке PB, и в исходных файлах
 				&& i->second.fileDate != i->second.libDate ) { 
 			cout << i->second.srcPath << endl;
 			SetModificationDate(i->second.srcPath, i->second.libDate );
 		}
 	cout << "------------------------------" << endl;
-	cout << "РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ СѓСЃРїРµС€РЅРѕ Р·Р°РІРµСЂС€РµРЅР°" << endl;
+	cout << "Синхронизация успешно завершена" << endl;
 
 	return res;
 }
